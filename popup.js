@@ -38,3 +38,12 @@ document.addEventListener('DOMContentLoaded', () => {
       showCopyError();
     }
   });
+
+   function showCopySuccess() {
+    copyAllBtn.innerHTML = '<span class="copy-icon">✓</span><span>Copied!</span>';
+    copyAllBtn.classList.add('copied');
+    setTimeout(() => {
+      copyAllBtn.innerHTML = '<span class="copy-icon">⎘</span><span>Copy All</span>';
+      copyAllBtn.classList.remove('copied');
+    }, 2000);
+  }
