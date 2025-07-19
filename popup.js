@@ -54,3 +54,13 @@ document.addEventListener('DOMContentLoaded', () => {
       copyAllBtn.innerHTML = '<span class="copy-icon">⎘</span><span>Copy All</span>';
     }, 2000);
   }
+
+  // KEYWORD EXTRACTION FUNCTIONS (FULLY PRESERVED)
+  function analyzeAndDisplayKeywords(titles) {
+    const keywordContainer = document.getElementById('keywordContainer');
+    const stopWords = new Set([
+      'a', 'an', 'the', 'in', 'on', 'of', 'for', 'to', 'with', 'is', 'are', 'was', 'were',
+      'and', 'or', 'but', 'vs', 'i', 'you', 'he', 'she', 'it', 'we', 'they', 'my', 'your',
+      'his', 'her', 'its', 'our', 'their', 'from', 'by', 'at', 'new', 'how', 'what', 'why',
+      '|', '-', '2024', '2025'
+    ]);
