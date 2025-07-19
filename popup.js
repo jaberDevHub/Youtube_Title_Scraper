@@ -47,3 +47,10 @@ document.addEventListener('DOMContentLoaded', () => {
       copyAllBtn.classList.remove('copied');
     }, 2000);
   }
+
+   function showCopyError() {
+    copyAllBtn.textContent = 'Copy Failed!';
+    setTimeout(() => {
+      copyAllBtn.innerHTML = '<span class="copy-icon">⎘</span><span>Copy All</span>';
+    }, 2000);
+  }
