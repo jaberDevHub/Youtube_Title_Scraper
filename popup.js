@@ -95,3 +95,12 @@ document.addEventListener('DOMContentLoaded', () => {
       tag.innerHTML = `${keyword} <span class="tag-count">${count}</span>`;
       keywordContainer.appendChild(tag);
     });
+
+    // Display keyword phrases
+    keywordPhrases.forEach(phrase => {
+      const phraseTag = document.createElement('span');
+      phraseTag.className = 'keyword-tag';
+      phraseTag.innerHTML = `${phrase}`;
+      keywordContainer.appendChild(phraseTag);
+    });
+  }
