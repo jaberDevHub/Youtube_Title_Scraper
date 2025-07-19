@@ -64,3 +64,34 @@ document.addEventListener('DOMContentLoaded', () => {
       'his', 'her', 'its', 'our', 'their', 'from', 'by', 'at', 'new', 'how', 'what', 'why',
       '|', '-', '2024', '2025'
     ]);
+
+    const allText = titles.join(' ').toLowerCase();
+    const words = allText
+      .replace(/[^\w\s]/g, '')
+      .split(/\s+/)
+      .filter(word => word && !stopWords.has(word));
+      
+      // Capture multi-word phrases like "live match", "test match"
+    const keywordPhrases = extractKeyPhrases(titles);
+
+    const wordCounts = {};
+    words.forEach(word => {
+      wordCounts[word] = (wordCounts[word] || 0) + 1;
+    });
+
+    const sortedKeywords = Object.entries(wordCounts).sort((a, b) => b[1] - a[1]);
+    const topKeywords = sortedKeywords.slice(0, 10);
+    
+    keywordContainer.innerHTML = '';
+
+    if (topKeywords.length === 0) {
+      keywordContainer.innerHTML = '<p>Not enough data to analyze.</p>';
+      return;
+    }
+
+    topKeywords.forEach(([keyword, count]) => {
+      const tag = document.createElement('span');
+      tag.className = 'keyword-tag';
+      tag.innerHTML = `${keyword} <span class="tag-count">${count}</span>`;
+      keywordContainer.appendChild(tag);
+    });
