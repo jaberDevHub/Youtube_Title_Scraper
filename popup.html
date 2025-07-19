@@ -75,9 +75,33 @@
       transition: all 0.2s ease;
       position: relative;
     }
-#titleList li:hover {
+    #titleList li:hover {
       background: #f5f5f5;
       transform: translateX(2px);
+    }
+
+    #keywordContainer {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 8px;
+      margin-top: 10px;
+    }
+    
+    .keyword-tag {
+      display: inline-flex;
+      align-items: center;
+      background-color: var(--tag-color);
+      padding: 6px 12px;
+      border-radius: 16px;
+      font-size: 12px;
+      font-weight: 500;
+      transition: all 0.2s ease;
+      cursor: default;
+    }
+    
+    .keyword-tag:hover {
+      background-color: var(--tag-hover);
+      transform: scale(1.05);
     }
     
     </style>
