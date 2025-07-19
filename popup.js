@@ -104,3 +104,16 @@ document.addEventListener('DOMContentLoaded', () => {
       keywordContainer.appendChild(phraseTag);
     });
   }
+
+  function extractKeyPhrases(titles) {
+    const phrases = [];
+    const pattern = /\b(\w+\s\w+)\b/g;
+    titles.forEach(title => {
+      let match;
+      while (match = pattern.exec(title)) {
+        phrases.push(match[0].toLowerCase());
+      }
+    });
+    return [...new Set(phrases)]; // Return unique phrases only
+  }
+});

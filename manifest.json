@@ -1,0 +1,28 @@
+{
+  "manifest_version": 3,
+  "name": "YouTube Title & Keyword Extractor",
+  "version": "1.0",
+  "description": "Extracts titles and keywords from YouTube search results.",
+  "permissions": [
+    "activeTab",
+    "scripting",
+    "clipboardWrite"
+  ],
+  "action": {
+    "default_popup": "popup.html",
+    "default_icon": {
+      "48": "images/icon48.png",
+      "128": "images/icon128.png"
+    }
+  },
+  "content_scripts": [
+    {
+      "matches": ["*://*.youtube.com/results*"],
+      "js": ["content.js"]
+    }
+  ],
+  "icons": {
+    "48": "images/icon48.png",
+    "128": "images/icon128.png"
+  }
+}
