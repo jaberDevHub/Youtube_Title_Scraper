@@ -24,3 +24,17 @@ document.addEventListener('DOMContentLoaded', () => {
       }
     });
   });
+
+    // Copy all titles functionality
+  copyAllBtn.addEventListener('click', async () => {
+    if (currentTitles.length === 0) return;
+    
+    try {
+      const titlesText = currentTitles.join('\n');
+      await navigator.clipboard.writeText(titlesText);
+      showCopySuccess();
+    } catch (err) {
+      console.error('Failed to copy titles: ', err);
+      showCopyError();
+    }
+  });
