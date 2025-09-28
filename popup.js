@@ -1,6 +1,8 @@
 document.addEventListener('DOMContentLoaded', () => {
   const copyAllBtn = document.getElementById('copyAllBtn');
+  const copyKeywordsBtn = document.getElementById('copyKeywordsBtn');
   let currentTitles = [];
+  let currentKeywords = [];
 
   chrome.tabs.query({ active: true, currentWindow: true }, (tabs) => {
     const activeTab = tabs[0];
@@ -25,95 +27,120 @@ document.addEventListener('DOMContentLoaded', () => {
     });
   });
 
-    // Copy all titles functionality
+  // Copy all titles functionality
   copyAllBtn.addEventListener('click', async () => {
     if (currentTitles.length === 0) return;
     
     try {
       const titlesText = currentTitles.join('\n');
       await navigator.clipboard.writeText(titlesText);
-      showCopySuccess();
+      showCopySuccess(copyAllBtn, 'Copy All');
     } catch (err) {
       console.error('Failed to copy titles: ', err);
-      showCopyError();
+      showCopyError(copyAllBtn, 'Copy All');
     }
   });
 
-   function showCopySuccess() {
-    copyAllBtn.innerHTML = '<span class="copy-icon">✓</span><span>Copied!</span>';
-    copyAllBtn.classList.add('copied');
+  // Copy all keywords functionality
+  copyKeywordsBtn.addEventListener('click', async () => {
+    if (currentKeywords.length === 0) return;
+    
+    try {
+      const keywordsText = currentKeywords.join('\n');
+      await navigator.clipboard.writeText(keywordsText);
+      showCopySuccess(copyKeywordsBtn, 'Copy Keywords');
+    } catch (err) {
+      console.error('Failed to copy keywords: ', err);
+      showCopyError(copyKeywordsBtn, 'Copy Keywords');
+    }
+  });
+
+   function showCopySuccess(button, originalText) {
+    button.innerHTML = '<span class="copy-icon">✓</span><span>Copied!</span>';
+    button.classList.add('copied');
     setTimeout(() => {
-      copyAllBtn.innerHTML = '<span class="copy-icon">⎘</span><span>Copy All</span>';
-      copyAllBtn.classList.remove('copied');
+      button.innerHTML = `<span class="copy-icon">⎘</span><span>${originalText}</span>`;
+      button.classList.remove('copied');
     }, 2000);
   }
 
-   function showCopyError() {
-    copyAllBtn.textContent = 'Copy Failed!';
+   function showCopyError(button, originalText) {
+    button.textContent = 'Copy Failed!';
     setTimeout(() => {
-      copyAllBtn.innerHTML = '<span class="copy-icon">⎘</span><span>Copy All</span>';
+      button.innerHTML = `<span class="copy-icon">⎘</span><span>${originalText}</span>`;
     }, 2000);
   }
 
-  // KEYWORD EXTRACTION FUNCTIONS (FULLY PRESERVED)
+  // CONCEPT EXTRACTION FUNCTIONS
   function analyzeAndDisplayKeywords(titles) {
     const keywordContainer = document.getElementById('keywordContainer');
     const stopWords = new Set([
       'a', 'an', 'the', 'in', 'on', 'of', 'for', 'to', 'with', 'is', 'are', 'was', 'were',
-      'and', 'or', 'but', 'vs', 'i', 'you', 'he', 'she', 'it', 'we', 'they', 'my', 'your',
+      'and', 'or', 'but', 'i', 'you', 'he', 'she', 'it', 'we', 'they', 'my', 'your',
       'his', 'her', 'its', 'our', 'their', 'from', 'by', 'at', 'new', 'how', 'what', 'why',
-      '|', '-', '2024', '2025'
+      '|', '-', '2024', '2025', 'vs'
     ]);
 
-    const allText = titles.join(' ').toLowerCase();
-    const words = allText
-      .replace(/[^\w\s]/g, '')
-      .split(/\s+/)
-      .filter(word => word && !stopWords.has(word));
-      
-      // Capture multi-word phrases like "live match", "test match"
-    const keywordPhrases = extractKeyPhrases(titles);
+    const allPhrases = titles.flatMap(title => 
+      title.toLowerCase().split(/[|,]/).map(part => part.trim())
+    );
 
-    const wordCounts = {};
-    words.forEach(word => {
-      wordCounts[word] = (wordCounts[word] || 0) + 1;
+    const allNgrams = [];
+    allPhrases.forEach(phrase => {
+      if (phrase) {
+        allNgrams.push(phrase);
+        const words = phrase.split(/\s+/).filter(word => word && !stopWords.has(word));
+        
+        for (let i = 0; i < words.length - 1; i++) {
+          allNgrams.push(words[i] + ' ' + words[i+1]);
+        }
+
+        for (let i = 0; i < words.length - 2; i++) {
+          allNgrams.push(words[i] + ' ' + words[i+1] + ' ' + words[i+2]);
+        }
+      }
     });
 
-    const sortedKeywords = Object.entries(wordCounts).sort((a, b) => b[1] - a[1]);
-    const topKeywords = sortedKeywords.slice(0, 10);
-    
-    keywordContainer.innerHTML = '';
+    const phraseCounts = {};
+    allNgrams.forEach(phrase => {
+      const trimmedPhrase = phrase.trim();
+      if (trimmedPhrase.length < 5) return;
 
-    if (topKeywords.length === 0) {
-      keywordContainer.innerHTML = '<p>Not enough data to analyze.</p>';
+      const wordsInPhrase = trimmedPhrase.split(/\s+/);
+      if (wordsInPhrase.length === 1 && stopWords.has(wordsInPhrase[0])) {
+        return;
+      }
+      
+      phraseCounts[trimmedPhrase] = (phraseCounts[trimmedPhrase] || 0) + 1;
+    });
+
+    const sortedPhrases = Object.entries(phraseCounts)
+      .sort((a, b) => b[1] - a[1])
+      .slice(0, 20);
+
+    keywordContainer.innerHTML = '';
+    currentKeywords = []; // Reset keywords
+
+    if (sortedPhrases.length === 0) {
+      keywordContainer.innerHTML = '<div class="loading">Not enough data to analyze.</div>';
+      copyKeywordsBtn.disabled = true;
       return;
     }
 
-    topKeywords.forEach(([keyword, count]) => {
-      const tag = document.createElement('span');
-      tag.className = 'keyword-tag';
-      tag.innerHTML = `${keyword} <span class="tag-count">${count}</span>`;
-      keywordContainer.appendChild(tag);
-    });
-
-    // Display keyword phrases
-    keywordPhrases.forEach(phrase => {
-      const phraseTag = document.createElement('span');
-      phraseTag.className = 'keyword-tag';
-      phraseTag.innerHTML = `${phrase}`;
-      keywordContainer.appendChild(phraseTag);
-    });
-  }
-
-  function extractKeyPhrases(titles) {
-    const phrases = [];
-    const pattern = /\b(\w+\s\w+)\b/g;
-    titles.forEach(title => {
-      let match;
-      while (match = pattern.exec(title)) {
-        phrases.push(match[0].toLowerCase());
+    copyKeywordsBtn.disabled = false;
+    sortedPhrases.forEach(([phrase, count]) => {
+      if (count > 1) {
+        currentKeywords.push(phrase);
+        const tag = document.createElement('span');
+        tag.className = 'keyword-tag';
+        tag.textContent = phrase;
+        keywordContainer.appendChild(tag);
       }
     });
-    return [...new Set(phrases)]; // Return unique phrases only
+
+    if (currentKeywords.length === 0) {
+        keywordContainer.innerHTML = '<div class="loading">No recurring concepts found.</div>';
+        copyKeywordsBtn.disabled = true;
+    }
   }
 });
