@@ -1,4 +1,4 @@
-# 🎯 YouTube Title Analyzer
+# 🎯 YouTube Title Scraper
 
 A simple yet powerful Chrome Extension that extracts video titles from YouTube search results — ideal for SEO research, competitor analysis, and content planning.
 
